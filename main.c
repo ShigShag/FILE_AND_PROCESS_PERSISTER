@@ -187,8 +187,8 @@ int check_file(char *path)
 int main(int argc, char *argv[])
 {
 
-    //HANDLE hWnd = GetConsoleWindow();
-    //ShowWindow(hWnd, SW_HIDE);
+    HANDLE hWnd = GetConsoleWindow();
+    ShowWindow(hWnd, SW_HIDE);
 
     char *buff;
     char *path;
